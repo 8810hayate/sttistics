@@ -1488,14 +1488,54 @@ class QuizApp {
         this.streak = 0;
         this.maxStreak = 0;
         this.answeredQuestions = new Set();
-        this.reviewQuestions = new Set(); // Questions marked as needing review
+        this.reviewQuestions = new Set();
+        this.masteredQuestions = new Set(); // 「完璧」と回答した問題
         this.questionOrder = [];
 
+        this.loadProgress();
         this.initDOM();
         this.initCategories();
         this.initEventListeners();
-        this.resetQuestionOrder();
-        this.showQuestion();
+        this.filterQuestions();
+        this.updateCategoryProgress();
+    }
+
+    // --- LocalStorage 永続化 ---
+    saveProgress() {
+        try {
+            const data = {
+                mastered: [...this.masteredQuestions],
+                review: [...this.reviewQuestions],
+                answered: [...this.answeredQuestions],
+                correctCount: this.correctCount,
+                maxStreak: this.maxStreak
+            };
+            localStorage.setItem('stats2q_progress', JSON.stringify(data));
+        } catch (e) { /* ignore */ }
+    }
+
+    loadProgress() {
+        try {
+            const raw = localStorage.getItem('stats2q_progress');
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            this.masteredQuestions = new Set(data.mastered || []);
+            this.reviewQuestions = new Set(data.review || []);
+            this.answeredQuestions = new Set(data.answered || []);
+            this.correctCount = data.correctCount || 0;
+            this.maxStreak = data.maxStreak || 0;
+        } catch (e) { /* ignore */ }
+    }
+
+    resetAllProgress() {
+        this.masteredQuestions.clear();
+        this.reviewQuestions.clear();
+        this.answeredQuestions.clear();
+        this.correctCount = 0;
+        this.streak = 0;
+        this.maxStreak = 0;
+        this.saveProgress();
+        this.filterQuestions();
         this.updateCategoryProgress();
     }
 
@@ -1612,11 +1652,19 @@ class QuizApp {
         // Modal restart
         this.modalRestart.addEventListener('click', () => {
             this.completionModal.classList.add('hidden');
-            this.correctCount = 0;
             this.streak = 0;
-            this.answeredQuestions.clear();
             this.filterQuestions();
         });
+
+        // Reset progress button
+        const resetBtn = document.getElementById('reset-progress');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                if (confirm('すべての学習進捗をリセットしますか？\n（完璧・復習の記録がすべて消えます）')) {
+                    this.resetAllProgress();
+                }
+            });
+        }
 
         // Touch swipe
         let startX = 0;
@@ -1635,30 +1683,66 @@ class QuizApp {
     }
 
     filterQuestions() {
+        const catFilter = q => this.currentCategory === 'all' || q.category === this.currentCategory;
+
         if (this.mode === 'review') {
+            // 復習モード: 「もう一度」「あいまい」の問題のみ
             this.filteredQuestions = this.allQuestions.filter(q =>
-                this.reviewQuestions.has(this.allQuestions.indexOf(q)) &&
-                (this.currentCategory === 'all' || q.category === this.currentCategory)
+                this.reviewQuestions.has(this.allQuestions.indexOf(q)) && catFilter(q)
             );
         } else {
-            this.filteredQuestions = this.currentCategory === 'all'
-                ? [...this.allQuestions]
-                : this.allQuestions.filter(q => q.category === this.currentCategory);
+            // 順番/ランダムモード: 「完璧」の問題を除外
+            this.filteredQuestions = this.allQuestions.filter(q =>
+                !this.masteredQuestions.has(this.allQuestions.indexOf(q)) && catFilter(q)
+            );
         }
 
+        // フィルタ結果が空の場合のフォールバック
         if (this.filteredQuestions.length === 0) {
-            this.filteredQuestions = this.currentCategory === 'all'
-                ? [...this.allQuestions]
-                : this.allQuestions.filter(q => q.category === this.currentCategory);
-
-            if (this.filteredQuestions.length === 0) {
-                this.filteredQuestions = [...this.allQuestions];
+            if (this.mode === 'review') {
+                // 復習する問題がない
+                this.filteredQuestions = this.allQuestions.filter(catFilter);
+                if (this.filteredQuestions.length === 0) {
+                    this.filteredQuestions = [...this.allQuestions];
+                }
+                // 全問完璧なら通知
+                this.showAllMasteredMessage();
+            } else {
+                // 全問完璧 → 全問表示に戻す
+                this.filteredQuestions = this.allQuestions.filter(catFilter);
+                if (this.filteredQuestions.length === 0) {
+                    this.filteredQuestions = [...this.allQuestions];
+                }
+                this.showAllMasteredMessage();
             }
         }
 
         this.currentIndex = 0;
         this.resetQuestionOrder();
         this.showQuestion();
+        this.updateMasteredCounter();
+    }
+
+    showAllMasteredMessage() {
+        const catMastered = this.filteredQuestions.every(q =>
+            this.masteredQuestions.has(this.allQuestions.indexOf(q))
+        );
+        if (catMastered && this.masteredQuestions.size > 0) {
+            // Briefly show a congrats message via the card
+            setTimeout(() => {
+                if (this.filteredQuestions.length > 0) {
+                    this.cardQuestion.textContent = '🎉 このカテゴリの全問題を完璧にマスターしました！';
+                    this.cardHint.innerHTML = '<span>もう一度解きたい場合は進捗をリセットしてください</span>';
+                }
+            }, 100);
+        }
+    }
+
+    updateMasteredCounter() {
+        const counter = document.getElementById('mastered-value');
+        if (counter) {
+            counter.textContent = this.masteredQuestions.size;
+        }
     }
 
     resetQuestionOrder() {
@@ -1761,18 +1845,23 @@ class QuizApp {
             this.correctCount++;
             this.streak++;
             if (this.streak > this.maxStreak) this.maxStreak = this.streak;
+            this.masteredQuestions.add(globalIdx); // 完璧 → 次回非表示
             this.reviewQuestions.delete(globalIdx);
         } else if (level === 'bad') {
             this.streak = 0;
+            this.masteredQuestions.delete(globalIdx); // 完璧解除
             this.reviewQuestions.add(globalIdx);
         } else {
-            // ok - keep in review but don't break streak
+            // ok - あいまい → 復習リストに入れるが連続は維持
+            this.masteredQuestions.delete(globalIdx); // 完璧解除
             this.reviewQuestions.add(globalIdx);
         }
 
+        this.saveProgress();
         this.updateCategoryProgress();
+        this.updateMasteredCounter();
 
-        // Check if all questions answered
+        // Check if all remaining questions answered
         if (this.currentIndex >= this.filteredQuestions.length - 1) {
             this.showCompletion();
         } else {
@@ -1813,11 +1902,11 @@ class QuizApp {
             }).length;
             const mastered = catQuestions.filter(q => {
                 const idx = this.allQuestions.indexOf(q);
-                return this.answeredQuestions.has(idx) && !this.reviewQuestions.has(idx);
+                return this.masteredQuestions.has(idx);
             }).length;
 
             const icon = catQuestions[0]?.icon || '📌';
-            const pct = total > 0 ? (answered / total) * 100 : 0;
+            const pct = total > 0 ? (mastered / total) * 100 : 0;
             const isMastered = mastered === total && total > 0;
 
             const card = document.createElement('div');
@@ -1825,7 +1914,7 @@ class QuizApp {
             card.innerHTML = `
                 <div class="cat-progress-header">
                     <span class="cat-progress-name">${icon} ${cat}</span>
-                    <span class="cat-progress-count">${answered}/${total}</span>
+                    <span class="cat-progress-count">${mastered}/${total} 完璧</span>
                 </div>
                 <div class="cat-progress-bar-bg">
                     <div class="cat-progress-bar-fill ${isMastered ? 'mastered' : ''}" style="width: ${pct}%"></div>
