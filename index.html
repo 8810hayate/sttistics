@@ -83,19 +83,23 @@
                 <div class="card-container" id="card-container">
                     <div class="card" id="flashcard">
                         <div class="card-inner" id="card-inner">
-                            <div class="card-front" id="card-front">
-                                <div class="card-category-tag" id="card-cat-tag"></div>
-                                <div class="card-number" id="card-number">Q.1</div>
+                            <!-- Question (always visible) -->
+                            <div class="card-question-section" id="card-question-section">
+                                <div class="card-header-row">
+                                    <div class="card-category-tag" id="card-cat-tag"></div>
+                                    <div class="card-number" id="card-number">Q.1</div>
+                                </div>
                                 <div class="card-question" id="card-question"></div>
-                                <div class="card-hint">
+                                <div class="card-hint" id="card-hint">
                                     <span>クリックまたはスペースで解答を表示</span>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                                         <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
                                     </svg>
                                 </div>
                             </div>
-                            <div class="card-back" id="card-back">
-                                <div class="card-category-tag" id="card-cat-tag-back"></div>
+                            <!-- Answer (revealed on click) -->
+                            <div class="card-answer-section hidden" id="card-answer-section">
+                                <div class="card-divider"></div>
                                 <div class="card-answer-label">Answer</div>
                                 <div class="card-answer" id="card-answer"></div>
                                 <div class="card-supplement" id="card-supplement"></div>

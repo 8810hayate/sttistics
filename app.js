@@ -1506,9 +1506,10 @@ class QuizApp {
         this.cardAnswer = document.getElementById('card-answer');
         this.cardSupplement = document.getElementById('card-supplement');
         this.cardCatTag = document.getElementById('card-cat-tag');
-        this.cardCatTagBack = document.getElementById('card-cat-tag-back');
         this.cardNumber = document.getElementById('card-number');
         this.flashcard = document.getElementById('flashcard');
+        this.cardHint = document.getElementById('card-hint');
+        this.cardAnswerSection = document.getElementById('card-answer-section');
 
         // Assessment
         this.assessment = document.getElementById('assessment');
@@ -1548,8 +1549,8 @@ class QuizApp {
     }
 
     initEventListeners() {
-        // Card flip
-        this.flashcard.addEventListener('click', () => this.toggleFlip());
+        // Card reveal
+        this.flashcard.addEventListener('click', () => this.toggleReveal());
 
         // Keyboard
         document.addEventListener('keydown', (e) => {
@@ -1557,7 +1558,7 @@ class QuizApp {
                 case ' ':
                 case 'Enter':
                     e.preventDefault();
-                    this.toggleFlip();
+                    this.toggleReveal();
                     break;
                 case 'ArrowLeft':
                     e.preventDefault();
@@ -1674,9 +1675,19 @@ class QuizApp {
         }
     }
 
-    toggleFlip() {
+    toggleReveal() {
         this.isFlipped = !this.isFlipped;
-        this.cardInner.classList.toggle('flipped', this.isFlipped);
+        if (this.isFlipped) {
+            this.cardAnswerSection.classList.remove('hidden');
+            this.cardAnswerSection.classList.add('visible');
+            this.cardInner.classList.add('revealed');
+            this.cardHint.classList.add('hidden');
+        } else {
+            this.cardAnswerSection.classList.remove('visible');
+            this.cardAnswerSection.classList.add('hidden');
+            this.cardInner.classList.remove('revealed');
+            this.cardHint.classList.remove('hidden');
+        }
         this.assessment.classList.toggle('hidden', !this.isFlipped);
     }
 
@@ -1686,9 +1697,12 @@ class QuizApp {
         const idx = this.questionOrder[this.currentIndex];
         const q = this.filteredQuestions[idx];
 
-        // Reset flip
+        // Reset reveal
         this.isFlipped = false;
-        this.cardInner.classList.remove('flipped');
+        this.cardAnswerSection.classList.remove('visible');
+        this.cardAnswerSection.classList.add('hidden');
+        this.cardInner.classList.remove('revealed');
+        this.cardHint.classList.remove('hidden');
         this.assessment.classList.add('hidden');
 
         // Animate card entry
@@ -1701,7 +1715,6 @@ class QuizApp {
         this.cardAnswer.textContent = q.answer;
         this.cardSupplement.textContent = q.supplement || '';
         this.cardCatTag.textContent = `${q.icon} ${q.category}`;
-        this.cardCatTagBack.textContent = `${q.icon} ${q.category}`;
 
         const globalIdx = this.allQuestions.indexOf(q) + 1;
         this.cardNumber.textContent = `Q.${globalIdx}`;

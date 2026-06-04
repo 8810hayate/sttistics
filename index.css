@@ -311,60 +311,35 @@ body::before {
 }
 
 /* =============================================
-   Flashcard
+   Flashcard (Expand/Reveal)
    ============================================= */
 .card-area {
-    perspective: 1200px;
     margin-bottom: 24px;
 }
 
 .card-container {
     width: 100%;
-    min-height: 340px;
 }
 
 .card {
     width: 100%;
-    min-height: 340px;
     cursor: pointer;
     position: relative;
 }
 
 .card-inner {
-    position: relative;
     width: 100%;
-    min-height: 340px;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-style: preserve-3d;
-}
-
-.card-inner.flipped {
-    transform: rotateY(180deg);
-}
-
-.card-front,
-.card-back {
-    position: absolute;
-    width: 100%;
-    min-height: 340px;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    border-radius: var(--radius-xl);
-    padding: 40px 36px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
-.card-front {
     background: linear-gradient(145deg, rgba(26, 32, 53, 0.95), rgba(15, 23, 42, 0.95));
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: var(--shadow-card);
+    border-radius: var(--radius-xl);
+    padding: 36px 36px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
 }
 
-.card-front::before {
+.card-inner::before {
     content: '';
     position: absolute;
     top: 0;
@@ -373,30 +348,31 @@ body::before {
     height: 3px;
     background: var(--accent-gradient);
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    transition: background var(--transition-normal);
 }
 
-.card-back {
-    background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(10, 14, 26, 0.98));
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    box-shadow: var(--shadow-card), 0 0 40px rgba(99, 102, 241, 0.08);
-    transform: rotateY(180deg);
+.card-inner.revealed::before {
+    background: linear-gradient(90deg, var(--accent-1), var(--success), #10b981);
 }
 
-.card-back::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--success), #10b981);
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+.card-inner.revealed {
+    border-color: rgba(99, 102, 241, 0.15);
+    box-shadow: var(--shadow-card), 0 0 40px rgba(99, 102, 241, 0.06);
+}
+
+/* Question Section (always visible) */
+.card-question-section {
+    text-align: center;
+}
+
+.card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
 }
 
 .card-category-tag {
-    position: absolute;
-    top: 16px;
-    left: 20px;
     font-size: 0.7rem;
     font-weight: 600;
     color: var(--text-accent);
@@ -407,9 +383,6 @@ body::before {
 }
 
 .card-number {
-    position: absolute;
-    top: 16px;
-    right: 20px;
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--text-muted);
@@ -421,23 +394,55 @@ body::before {
     font-weight: 600;
     line-height: 1.8;
     color: var(--text-primary);
-    max-width: 600px;
+    max-width: 640px;
+    margin: 0 auto;
 }
 
 .card-hint {
-    position: absolute;
-    bottom: 20px;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     font-size: 0.72rem;
     color: var(--text-muted);
+    margin-top: 24px;
     animation: hintPulse 2s ease-in-out infinite;
+    transition: opacity var(--transition-normal);
+}
+
+.card-hint.hidden {
+    display: none;
 }
 
 @keyframes hintPulse {
     0%, 100% { opacity: 0.5; }
     50% { opacity: 1; }
+}
+
+/* Answer Section (revealed) */
+.card-answer-section {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.4s ease 0.1s;
+    text-align: center;
+}
+
+.card-answer-section.visible {
+    max-height: 800px;
+    opacity: 1;
+}
+
+.card-answer-section.hidden {
+    max-height: 0;
+    opacity: 0;
+}
+
+.card-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.3), rgba(34, 197, 94, 0.3), transparent);
+    margin: 28px 0 24px;
 }
 
 .card-answer-label {
@@ -450,6 +455,7 @@ body::before {
     background: var(--success-bg);
     padding: 4px 14px;
     border-radius: var(--radius-full);
+    display: inline-block;
 }
 
 .card-answer {
@@ -458,6 +464,7 @@ body::before {
     line-height: 1.8;
     color: var(--text-primary);
     max-width: 600px;
+    margin: 0 auto;
 }
 
 .card-supplement {
@@ -466,6 +473,8 @@ body::before {
     color: var(--text-secondary);
     line-height: 1.7;
     max-width: 550px;
+    margin-left: auto;
+    margin-right: auto;
     padding-top: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
