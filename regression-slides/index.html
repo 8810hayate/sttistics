@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>回帰分析 - Regression Analysis</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar">
+    <div id="progressFill"></div>
+  </div>
+
+  <div class="presentation">
+
+    <!-- ==================== Slide 0: Title ==================== -->
+    <section class="slide title-slide active" data-slide="0">
+      <div class="title-deco title-deco-1"></div>
+      <div class="title-deco title-deco-2"></div>
+      <span class="badge">統計検定2級対策</span>
+      <h1>回帰分析</h1>
+      <p class="subtitle">Regression Analysis</p>
+      <div class="start-hint">
+        <span class="arrow-keys">
+          <span class="key">←</span>
+          <span class="key">→</span>
+        </span>
+        矢印キーでスライドを移動
+      </div>
+    </section>
+
+    <!-- ==================== Slide 1: 回帰分析とは？ ==================== -->
+    <section class="slide" data-slide="1">
+      <span class="slide-number">01 / 15</span>
+      <h2><span class="emoji">📈</span> 回帰分析とは？</h2>
+
+      <div class="highlight-card">
+        「ある変数（目的変数）を別の変数（説明変数）で予測・説明する手法」
+      </div>
+
+      <div class="example-box">
+        <span class="example-icon">💡</span>
+        例：勉強時間 (x) からテスト点数 (y) を予測
+      </div>
+
+      <h3>2つのタイプ</h3>
+      <div class="two-col">
+        <div class="col-card">
+          <h4>📊 単回帰分析</h4>
+          <p>説明変数が <span class="weight">1つ</span> のモデル</p>
+          <p>y = β₀ + β₁x + ε</p>
+        </div>
+        <div class="col-card">
+          <h4>📊 重回帰分析</h4>
+          <p>説明変数が <span class="weight">2つ以上</span> のモデル</p>
+          <p>y = β₀ + β₁x₁ + β₂x₂ + … + ε</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== Slide 2: 単回帰モデル ==================== -->
+    <section class="slide" data-slide="2">
+      <span class="slide-number">02 / 15</span>
+      <h2><span class="emoji">📐</span> 単回帰モデル</h2>
+
+      <div class="formula-box">
+        <span class="formula-label">単回帰モデル</span>
+        <span class="formula">y<sub>i</sub> = β₀ + β₁x<sub>i</sub> + ε<sub>i</sub></span>
+      </div>
+
+      <ul class="var-list">
+        <li>
+          <span class="var-name">y<sub>i</sub></span>
+          <span class="var-desc">目的変数（被説明変数、応答変数）</span>
+        </li>
+        <li>
+          <span class="var-name">x<sub>i</sub></span>
+          <span class="var-desc">説明変数（独立変数、予測変数）</span>
+        </li>
+        <li>
+          <span class="var-name">β₀</span>
+          <span class="var-desc">切片（x = 0 のときの y の期待値）</span>
+        </li>
+        <li>
+          <span class="var-name">β₁</span>
+          <span class="var-desc">回帰係数：x が1増えたときの y の変化量</span>
+        </li>
+        <li>
+          <span class="var-name">ε<sub>i</sub></span>
+          <span class="var-desc">誤差項 〜 N(0, σ²)　（正規分布に従う）</span>
+        </li>
+      </ul>
+
+      <div class="accent-card">
+        🎯 目標 = データから β₀ と β₁ を推定すること
+      </div>
+    </section>
+
+    <!-- ==================== Slide 3: 最小二乗法 ==================== -->
+    <section class="slide" data-slide="3">
+      <span class="slide-number">03 / 15</span>
+      <h2><span class="emoji">🎯</span> 最小二乗法（OLS）の考え方</h2>
+
+      <p class="lead">残差の二乗和を最小にするように β を求める</p>
+
+      <div class="formula-box">
+        <span class="formula-label">最小化する目的関数</span>
+        <span class="formula">S(β₀, β₁) = Σ(y<sub>i</sub> − β₀ − β₁x<sub>i</sub>)²</span>
+      </div>
+
+      <div class="ols-visual">
+        <div class="ols-step">
+          <div class="step-label">データ点</div>
+          <div class="step-desc">(x<sub>i</sub>, y<sub>i</sub>)</div>
+        </div>
+        <span class="ols-arrow">→</span>
+        <div class="ols-step">
+          <div class="step-label">残差</div>
+          <div class="step-desc">実測値 − 予測値</div>
+        </div>
+        <span class="ols-arrow">→</span>
+        <div class="ols-step">
+          <div class="step-label">残差²の合計</div>
+          <div class="step-desc">を最小に！</div>
+        </div>
+      </div>
+
+      <div class="note-box">
+        <span class="note-icon">📝</span>
+        <span>二乗する理由 ＝ 正負の残差が相殺しないようにするため</span>
+      </div>
+    </section>
+
+    <!-- ==================== Slide 4: 導出① β₀ ==================== -->
+    <section class="slide" data-slide="4">
+      <span class="slide-number">04 / 15</span>
+      <h2><span class="emoji">✏️</span> 導出① β₀ の偏微分</h2>
+
+      <div class="calc-steps">
+        <div class="calc-row">
+          <span class="step-num">1</span>
+          <span class="step-content">∂S/∂β₀ = −2Σ(y<sub>i</sub> − β₀ − β₁x<sub>i</sub>) = 0</span>
+        </div>
+        <div class="calc-row">
+          <span class="step-num">2</span>
+          <span class="step-content">Σy<sub>i</sub> − nβ₀ − β₁Σx<sub>i</sub> = 0</span>
+        </div>
+        <div class="calc-row">
+          <span class="step-num">3</span>
+          <span class="step-content">n で割る：ȳ − β₀ − β₁x̄ = 0</span>
+        </div>
+        <div class="calc-total">
+          <span class="result-icon">∴</span>
+          <span>β̂₀ = ȳ − β̂₁x̄</span>
+        </div>
+      </div>
+
+      <div class="highlight-card">
+        💡 回帰直線は必ず (x̄, ȳ) を通る
+      </div>
+    </section>
+
+    <!-- ==================== Slide 5: 導出② β₁ ==================== -->
+    <section class="slide" data-slide="5">
+      <span class="slide-number">05 / 15</span>
+      <h2><span class="emoji">✏️</span> 導出② β₁ の偏微分</h2>
+
+      <div class="calc-steps">
+        <div class="calc-row">
+          <span class="step-num">1</span>
+          <span class="step-content">∂S/∂β₁ = −2Σx<sub>i</sub>(y<sub>i</sub> − β₀ − β₁x<sub>i</sub>) = 0</span>
+        </div>
+        <div class="calc-row">
+          <span class="step-num">2</span>
+          <span class="step-content">Σx<sub>i</sub>y<sub>i</sub> − β₀Σx<sub>i</sub> − β₁Σx<sub>i</sub>² = 0</span>
+        </div>
+        <div class="calc-row">
+          <span class="step-num">3</span>
+          <span class="step-content">β₀ = ȳ − β₁x̄ を代入して整理</span>
+        </div>
+        <div class="calc-total">
+          <span class="result-icon">∴</span>
+          <span>Σx<sub>i</sub>y<sub>i</sub> − nx̄ȳ = β₁(Σx<sub>i</sub>² − nx̄²)</span>
+        </div>
+      </div>
+
+      <div class="note-box">
+        <span class="note-icon">📝</span>
+        <span>左辺 = S<sub>xy</sub>（偏差積和）、右辺の括弧 = S<sub>xx</sub>（偏差平方和）</span>
+      </div>
+    </section>
+
+    <!-- ==================== Slide 6: 導出の結論 ==================== -->
+    <section class="slide" data-slide="6">
+      <span class="slide-number">06 / 15</span>
+      <h2><span class="emoji">🏁</span> 最小二乗推定量</h2>
+
+      <div class="two-col">
+        <div class="formula-box">
+          <span class="formula-label">回帰係数</span>
+          <span class="formula">β̂₁ = <span class="frac"><span class="num">S<sub>xy</sub></span><span class="den">S<sub>xx</sub></span></span> = <span class="frac"><span class="num">Σ(x<sub>i</sub> − x̄)(y<sub>i</sub> − ȳ)</span><span class="den">Σ(x<sub>i</sub> − x̄)²</span></span></span>
+        </div>
+        <div class="formula-box">
+          <span class="formula-label">切片</span>
+          <span class="formula">β̂₀ = ȳ − β̂₁x̄</span>
+        </div>
+      </div>
+
+      <ul class="var-list">
+        <li>
+          <span class="var-name">S<sub>xy</sub></span>
+          <span class="var-desc">x と y の偏差積和（共変動）</span>
+        </li>
+        <li>
+          <span class="var-name">S<sub>xx</sub></span>
+          <span class="var-desc">x の偏差平方和（x のばらつき）</span>
+        </li>
+      </ul>
+
+      <div class="accent-card">
+        💡 β̂₁ = 「x と y の共変動」÷「x の変動」
+      </div>
+    </section>
+
+    <!-- ==================== Slide 7: 決定係数 R² ==================== -->
+    <section class="slide" data-slide="7">
+      <span class="slide-number">07 / 15</span>
+      <h2><span class="emoji">📊</span> 決定係数 R²</h2>
+
+      <div class="decomposition">
+        <div class="decomp-box total">
+          <div class="decomp-label">全変動</div>
+          <div class="decomp-name">SST</div>
+          <div class="decomp-formula">Σ(y<sub>i</sub> − ȳ)²</div>
+        </div>
+        <span class="decomp-sign">=</span>
+        <div class="decomp-box regression">
+          <div class="decomp-label">回帰変動</div>
+          <div class="decomp-name">SSR</div>
+          <div class="decomp-formula">Σ(ŷ<sub>i</sub> − ȳ)²</div>
+        </div>
+        <span class="decomp-sign">+</span>
+        <div class="decomp-box residual">
+          <div class="decomp-label">残差変動</div>
+          <div class="decomp-name">SSE</div>
+          <div class="decomp-formula">Σ(y<sub>i</sub> − ŷ<sub>i</sub>)²</div>
+        </div>
+      </div>
+
+      <div class="formula-box">
+        <span class="formula-label">決定係数</span>
+        <span class="formula">R² = <span class="frac"><span class="num">SSR</span><span class="den">SST</span></span> = 1 − <span class="frac"><span class="num">SSE</span><span class="den">SST</span></span></span>
+      </div>
+
+      <div class="small-cards">
+        <div class="small-card">
+          <span class="sc-label">R² → 1</span>
+          当てはまりが良い（説明力が高い）
+        </div>
+        <div class="small-card">
+          <span class="sc-label">R² → 0</span>
+          説明力が低い（モデルが不適合）
+        </div>
+      </div>
+
+      <div class="note-box">
+        <span class="note-icon">📝</span>
+        <span>単回帰では R² = r²（相関係数の二乗）が成り立つ</span>
+      </div>
+    </section>
+
+    <!-- ==================== Slide 8: 回帰係数の検定 ==================== -->
+    <section class="slide" data-slide="8">
+      <span class="slide-number">08 / 15</span>
+      <h2><span class="emoji">🧪</span> 回帰係数の検定</h2>
+
+      <div class="two-col">
+        <div class="col-card">
+          <h4>帰無仮説 H₀</h4>
+          <p>β₁ = 0（線形関係なし）</p>
+        </div>
+        <div class="col-card">
+          <h4>対立仮説 H₁</h4>
+          <p>β₁ ≠ 0（線形関係あり）</p>
+        </div>
+      </div>
+
+      <div class="formula-box">
+        <span class="formula-label">検定統計量</span>
+        <span class="formula">t = <span class="frac"><span class="num">β̂₁</span><span class="den">SE(β̂₁)</span></span></span>
+      </div>
+
+      <ul class="var-list">
+        <li>
+          <span class="var-name">SE(β̂₁)</span>
+          <span class="var-desc">= √(σ̂² / S<sub>xx</sub>)　β̂₁ の標準誤差</span>
+        </li>
+        <li>
+          <span class="var-name">σ̂²</span>
+          <span class="var-desc">= SSE / (n − 2)　誤差分散の推定値</span>
+        </li>
+        <li>
+          <span class="var-name">自由度</span>
+          <span class="var-desc">n − 2（パラメータ β₀, β₁ の2つを推定）</span>
+        </li>
+      </ul>
+
+      <div class="accent-card">
+        📌 |t| &gt; t<sub>α/2</sub>(n−2) なら「有意な線形関係がある」と判断
+      </div>
+    </section>
+
+    <!-- ==================== Slide 9: 分散分析表 ==================== -->
+    <section class="slide" data-slide="9">
+      <span class="slide-number">09 / 15</span>
+      <h2><span class="emoji">📋</span> 回帰の分散分析表</h2>
+
+      <table class="anova-table">
+        <thead>
+          <tr>
+            <th>要因</th>
+            <th>SS</th>
+            <th>df</th>
+            <th>MS</th>
+            <th>F値</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>回帰</td>
+            <td>SSR</td>
+            <td>1</td>
+            <td>SSR / 1</td>
+            <td>MSR / MSE</td>
+          </tr>
+          <tr>
+            <td>残差</td>
+            <td>SSE</td>
+            <td>n − 2</td>
+            <td>SSE / (n−2)</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>全体</td>
+            <td>SST</td>
+            <td>n − 1</td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="highlight-card">
+        💡 単回帰では F = t² が成り立つ（F検定とt検定は等価）
+      </div>
+    </section>
+
+    <!-- ==================== Slide 10: 重回帰分析 ==================== -->
+    <section class="slide" data-slide="10">
+      <span class="slide-number">10 / 15</span>
+      <h2><span class="emoji">🔢</span> 重回帰分析</h2>
+
+      <div class="formula-box">
+        <span class="formula-label">重回帰モデル</span>
+        <span class="formula">y<sub>i</sub> = β₀ + β₁x<sub>i1</sub> + β₂x<sub>i2</sub> + … + β<sub>p</sub>x<sub>ip</sub> + ε<sub>i</sub></span>
+      </div>
+
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>項目</th>
+            <th>単回帰</th>
+            <th>重回帰</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>説明変数</td>
+            <td>1つ</td>
+            <td>2つ以上</td>
+          </tr>
+          <tr>
+            <td>回帰係数</td>
+            <td>β₁</td>
+            <td>偏回帰係数</td>
+          </tr>
+          <tr>
+            <td>決定係数</td>
+            <td>R²</td>
+            <td>自由度調整済み R²</td>
+          </tr>
+          <tr>
+            <td>回帰の df</td>
+            <td>1</td>
+            <td>p</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note-box">
+        <span class="note-icon">📝</span>
+        <span>偏回帰係数 ＝ 他の変数を固定したときの、その変数1単位あたりの効果</span>
+      </div>
+    </section>
+
+    <!-- ==================== Slide 11: 自由度調整済み R² ==================== -->
+    <section class="slide" data-slide="11">
+      <span class="slide-number">11 / 15</span>
+      <h2><span class="emoji">⚖️</span> 自由度調整済み R²</h2>
+
+      <p class="lead">変数を増やすと R² は必ず増加 → 変数の数でペナルティをかける</p>
+
+      <div class="formula-box">
+        <span class="formula-label">自由度調整済み決定係数</span>
+        <span class="formula">R̄² = 1 − <span class="frac"><span class="num">SSE / (n − p − 1)</span><span class="den">SST / (n − 1)</span></span></span>
+      </div>
+
+      <div class="two-col">
+        <div class="col-card">
+          <h4>📊 R²（通常）</h4>
+          <ul>
+            <li>変数追加で必ず↑</li>
+            <li>過学習を見抜けない</li>
+          </ul>
+        </div>
+        <div class="col-card">
+          <h4>📊 調整済み R²</h4>
+          <ul>
+            <li>不要な変数追加で↓</li>
+            <li>モデル選択に有用</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== Slide 12: 重回帰の注意点 ==================== -->
+    <section class="slide" data-slide="12">
+      <span class="slide-number">12 / 15</span>
+      <h2><span class="emoji">⚠️</span> 重回帰の注意点</h2>
+
+      <div class="assumptions three-col">
+        <div class="assumption-card">
+          <div class="card-num">1</div>
+          <h4>多重共線性</h4>
+          <p>説明変数同士の相関が高いと推定が不安定になる。VIF（分散拡大因子）で確認する。</p>
+        </div>
+        <div class="assumption-card">
+          <div class="card-num">2</div>
+          <h4>変数選択</h4>
+          <p>AIC・BIC 等の情報量基準で不要な変数を除き、最適なモデルを選ぶ。</p>
+        </div>
+        <div class="assumption-card">
+          <div class="card-num">3</div>
+          <h4>ダミー変数</h4>
+          <p>カテゴリ変数を 0/1 で数値化して回帰モデルに含める。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== Slide 13: 残差分析 ==================== -->
+    <section class="slide" data-slide="13">
+      <span class="slide-number">13 / 15</span>
+      <h2><span class="emoji">🔍</span> 残差分析</h2>
+
+      <p class="lead">モデルの妥当性を残差のパターンから確認する</p>
+
+      <div class="assumptions">
+        <div class="assumption-card">
+          <div class="card-num">1</div>
+          <h4>等分散性</h4>
+          <p>残差のばらつきが一定か確認（残差 vs 予測値プロット）</p>
+        </div>
+        <div class="assumption-card">
+          <div class="card-num">2</div>
+          <h4>正規性</h4>
+          <p>残差が正規分布に従うか確認（Q-Qプロット）</p>
+        </div>
+        <div class="assumption-card">
+          <div class="card-num">3</div>
+          <h4>独立性</h4>
+          <p>残差に系列相関がないか確認（ダービン・ワトソン統計量）</p>
+        </div>
+        <div class="assumption-card">
+          <div class="card-num">4</div>
+          <h4>線形性</h4>
+          <p>x と y の関係が線形か確認（残差に曲線パターンがないこと）</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== Slide 14: 分析の流れまとめ ==================== -->
+    <section class="slide" data-slide="14">
+      <span class="slide-number">14 / 15</span>
+      <h2><span class="emoji">🗺️</span> 回帰分析の流れ（まとめ）</h2>
+
+      <div class="flow-chart">
+        <div class="flow-step">
+          <span class="flow-num">1</span>
+          <span class="flow-text">散布図で関係を確認</span>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">
+          <span class="flow-num">2</span>
+          <span class="flow-text">最小二乗法で β を推定</span>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">
+          <span class="flow-num">3</span>
+          <span class="flow-text">R² で当てはまりを評価</span>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">
+          <span class="flow-num">4</span>
+          <span class="flow-text">t検定 / F検定で有意性を検定</span>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">
+          <span class="flow-num">5</span>
+          <span class="flow-text">残差分析でモデルの妥当性を確認</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== Slide 15: End/Summary ==================== -->
+    <section class="slide title-slide" data-slide="15">
+      <div class="title-deco title-deco-1"></div>
+      <div class="title-deco title-deco-2"></div>
+      <span class="badge">まとめ</span>
+      <h1>回帰分析</h1>
+      <ul class="end-summary">
+        <li><span class="check">✅</span> 最小二乗法で β₀, β₁ を推定</li>
+        <li><span class="check">✅</span> β̂₁ = S<sub>xy</sub> / S<sub>xx</sub></li>
+        <li><span class="check">✅</span> R² = 1 − SSE/SST で当てはまり評価</li>
+        <li><span class="check">✅</span> t検定で回帰係数の有意性を判定</li>
+        <li><span class="check">✅</span> 重回帰では調整済み R² を使う</li>
+      </ul>
+    </section>
+
+  </div>
+
+  <!-- Navigation Controls -->
+  <div id="slideDots"></div>
+  <div class="nav-controls">
+    <button class="nav-btn" id="prevBtn">←</button>
+    <div class="slide-counter">
+      <span class="current" id="currentSlide">1</span> / <span id="totalSlides">16</span>
+    </div>
+    <button class="nav-btn" id="nextBtn">→</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

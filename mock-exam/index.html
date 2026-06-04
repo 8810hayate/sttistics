@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>統計検定2級 模擬試験</title>
+  <meta name="description" content="統計検定2級の模擬試験。全20問・制限時間60分。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== Start Screen ===== -->
+  <div id="startScreen" class="screen active">
+    <div class="start-container">
+      <div class="badge">模擬試験</div>
+      <h1>統計検定 2級</h1>
+      <p class="subtitle">Practice Exam</p>
+      <div class="exam-info">
+        <div class="info-card">
+          <div class="info-icon">📝</div>
+          <div class="info-label">問題数</div>
+          <div class="info-value">20問</div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">⏱️</div>
+          <div class="info-label">制限時間</div>
+          <div class="info-value">60分</div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">✅</div>
+          <div class="info-label">合格基準</div>
+          <div class="info-value">60%以上</div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">📊</div>
+          <div class="info-label">出題範囲</div>
+          <div class="info-value">全9分野</div>
+        </div>
+      </div>
+      <div class="topic-tags">
+        <span class="tag">データの記述</span>
+        <span class="tag">確率</span>
+        <span class="tag">確率分布</span>
+        <span class="tag">標本分布</span>
+        <span class="tag">推定</span>
+        <span class="tag">仮説検定</span>
+        <span class="tag">回帰分析</span>
+        <span class="tag">分散分析</span>
+      </div>
+      <button id="startBtn" class="primary-btn">試験を開始する</button>
+    </div>
+  </div>
+
+  <!-- ===== Exam Screen ===== -->
+  <div id="examScreen" class="screen">
+    <header class="exam-header">
+      <div class="header-left">
+        <span class="header-badge">統計検定2級 模擬試験</span>
+      </div>
+      <div class="header-center">
+        <div id="timer" class="timer">60:00</div>
+      </div>
+      <div class="header-right">
+        <span id="progressText" class="progress-text">1 / 20</span>
+      </div>
+    </header>
+
+    <div class="progress-bar">
+      <div id="examProgress" class="progress-fill"></div>
+    </div>
+
+    <main class="exam-main">
+      <div class="question-area">
+        <div class="question-meta">
+          <span id="questionCategory" class="q-category">分野</span>
+          <span id="questionNumber" class="q-number">問1</span>
+        </div>
+        <div id="questionText" class="question-text"></div>
+        <div id="choicesContainer" class="choices"></div>
+      </div>
+    </main>
+
+    <footer class="exam-footer">
+      <button id="prevQuestion" class="nav-btn" disabled>← 前の問題</button>
+      <div class="question-dots" id="questionDots"></div>
+      <button id="nextQuestion" class="nav-btn">次の問題 →</button>
+    </footer>
+
+    <button id="submitExam" class="submit-btn">解答を提出する</button>
+  </div>
+
+  <!-- ===== Result Screen ===== -->
+  <div id="resultScreen" class="screen">
+    <div class="result-container">
+      <div id="resultHeader" class="result-header">
+        <div class="badge">結果発表</div>
+        <div id="scoreCircle" class="score-circle">
+          <svg viewBox="0 0 120 120">
+            <circle class="score-bg" cx="60" cy="60" r="52"/>
+            <circle id="scoreArc" class="score-arc" cx="60" cy="60" r="52"/>
+          </svg>
+          <div class="score-text">
+            <span id="scorePercent" class="score-percent">0%</span>
+            <span class="score-label">正答率</span>
+          </div>
+        </div>
+        <div id="resultMessage" class="result-message"></div>
+        <div class="score-detail">
+          <div class="detail-item">
+            <span class="detail-label">正解数</span>
+            <span id="correctCount" class="detail-value">0</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">問題数</span>
+            <span class="detail-value">20</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">所要時間</span>
+            <span id="elapsedTime" class="detail-value">--:--</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="categoryBreakdown" class="category-breakdown"></div>
+
+      <h2 class="review-title">解答の振り返り</h2>
+      <div id="reviewContainer" class="review-container"></div>
+
+      <button id="retryBtn" class="primary-btn" style="margin-top:2rem">もう一度挑戦する</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

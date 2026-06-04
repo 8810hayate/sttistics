@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="統計検定2級の一問一答。確率、統計的推定、仮説検定、回帰分析など全分野をカバー。">
+    <title>統計検定2級 一問一答</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header" id="header">
+            <div class="header-inner">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 3v18h18"/>
+                            <path d="M7 16l4-8 4 4 4-6"/>
+                        </svg>
+                    </div>
+                    <h1>統計検定2級<span class="logo-accent">一問一答</span></h1>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-badge" id="stat-progress">
+                        <span class="stat-icon">📊</span>
+                        <span class="stat-label">進捗</span>
+                        <span class="stat-value" id="progress-value">0/0</span>
+                    </div>
+                    <div class="stat-badge" id="stat-correct">
+                        <span class="stat-icon">✅</span>
+                        <span class="stat-label">正解</span>
+                        <span class="stat-value" id="correct-value">0</span>
+                    </div>
+                    <div class="stat-badge" id="stat-streak">
+                        <span class="stat-icon">🔥</span>
+                        <span class="stat-label">連続</span>
+                        <span class="stat-value" id="streak-value">0</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Category Filter -->
+            <section class="categories" id="categories">
+                <div class="categories-scroll">
+                    <button class="cat-btn active" data-category="all" id="cat-all">
+                        <span class="cat-icon">📚</span>すべて
+                    </button>
+                </div>
+            </section>
+
+            <!-- Mode Selector -->
+            <section class="mode-selector" id="mode-selector">
+                <button class="mode-btn active" data-mode="sequential" id="mode-sequential">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <path d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    順番に
+                </button>
+                <button class="mode-btn" data-mode="random" id="mode-random">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+                    </svg>
+                    ランダム
+                </button>
+                <button class="mode-btn" data-mode="review" id="mode-review">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    復習
+                </button>
+            </section>
+
+            <!-- Card Area -->
+            <section class="card-area" id="card-area">
+                <div class="card-container" id="card-container">
+                    <div class="card" id="flashcard">
+                        <div class="card-inner" id="card-inner">
+                            <div class="card-front" id="card-front">
+                                <div class="card-category-tag" id="card-cat-tag"></div>
+                                <div class="card-number" id="card-number">Q.1</div>
+                                <div class="card-question" id="card-question"></div>
+                                <div class="card-hint">
+                                    <span>クリックまたはスペースで解答を表示</span>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                        <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="card-back" id="card-back">
+                                <div class="card-category-tag" id="card-cat-tag-back"></div>
+                                <div class="card-answer-label">Answer</div>
+                                <div class="card-answer" id="card-answer"></div>
+                                <div class="card-supplement" id="card-supplement"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Self-Assessment Buttons -->
+            <section class="assessment hidden" id="assessment">
+                <p class="assessment-label">理解度を選択してください</p>
+                <div class="assessment-buttons">
+                    <button class="assess-btn assess-bad" id="assess-bad" title="もう一度復習">
+                        <span class="assess-emoji">😓</span>
+                        <span>もう一度</span>
+                    </button>
+                    <button class="assess-btn assess-ok" id="assess-ok" title="なんとなく理解">
+                        <span class="assess-emoji">🤔</span>
+                        <span>あいまい</span>
+                    </button>
+                    <button class="assess-btn assess-good" id="assess-good" title="完璧に理解">
+                        <span class="assess-emoji">😊</span>
+                        <span>完璧！</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Navigation -->
+            <section class="navigation" id="navigation">
+                <button class="nav-btn nav-prev" id="nav-prev" title="前の問題 (←)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <div class="progress-bar-container" id="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                    <span class="progress-text" id="progress-text">1 / 100</span>
+                </div>
+                <button class="nav-btn nav-next" id="nav-next" title="次の問題 (→)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </section>
+
+            <!-- Progress Overview -->
+            <section class="progress-overview" id="progress-overview">
+                <h2 class="section-title">カテゴリ別 進捗</h2>
+                <div class="category-progress-grid" id="category-progress-grid">
+                    <!-- Filled by JS -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Completion Modal -->
+        <div class="modal-overlay hidden" id="completion-modal">
+            <div class="modal">
+                <div class="modal-confetti">🎉</div>
+                <h2 class="modal-title">おめでとうございます！</h2>
+                <p class="modal-text" id="modal-text">全問完了しました！</p>
+                <div class="modal-stats" id="modal-stats"></div>
+                <button class="modal-btn" id="modal-restart">もう一度チャレンジ</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

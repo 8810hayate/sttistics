@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>分散分析（ANOVA）入門スライド</title>
+  <meta name="description" content="統計検定2級対策 - 分散分析（ANOVA）の概要・用語・計算手順をスライド形式で解説">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="presentation">
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- Slide 1: Title -->
+    <section class="slide active" data-slide="0">
+      <div class="slide-content title-slide">
+        <div class="badge">統計検定2級対策</div>
+        <h1>分散分析</h1>
+        <p class="subtitle">Analysis of Variance（ANOVA）</p>
+        <div class="title-decoration">
+          <div class="deco-line"></div>
+          <div class="deco-dot"></div>
+          <div class="deco-line"></div>
+        </div>
+        <p class="start-hint">→ キーまたはクリックで進む</p>
+      </div>
+    </section>
+
+    <!-- Slide 2: What is ANOVA -->
+    <section class="slide" data-slide="1">
+      <div class="slide-content">
+        <div class="slide-number">01</div>
+        <h2>分散分析とは？</h2>
+        <div class="card highlight-card">
+          <div class="card-icon">🎯</div>
+          <p class="card-text"><strong>3つ以上のグループ</strong>の<strong>母平均に差があるか</strong>を検定する手法</p>
+        </div>
+        <div class="example-box">
+          <div class="example-label">例</div>
+          <p>「学習法 A・B・C でテストの点数に差があるか？」</p>
+        </div>
+        <div class="key-point">
+          <p>💡 平均の比較なのに「分散」分析？</p>
+          <p class="key-answer">→ データ全体の<em>ばらつき（分散）</em>を要因ごとに<em>分解</em>して平均の差を検定するため</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 3: Why not t-test -->
+    <section class="slide" data-slide="2">
+      <div class="slide-content">
+        <div class="slide-number">02</div>
+        <h2>なぜ t検定の繰り返しではダメ？</h2>
+        <p class="lead">ペアごとに t検定を繰り返すと<strong>第1種の過誤</strong>（偽陽性）が膨らむ</p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>グループ数</th>
+                <th>ペア数</th>
+                <th>誤る確率 (α=0.05)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>3</td>
+                <td>3</td>
+                <td><span class="tag tag-yellow">約 14%</span></td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>10</td>
+                <td><span class="tag tag-red">約 40%</span></td>
+              </tr>
+              <tr>
+                <td>10</td>
+                <td>45</td>
+                <td><span class="tag tag-red">約 90%</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card accent-card">
+          <p>✅ 分散分析なら <strong>1回の検定</strong> で全体の差を判定 → 過誤を制御できる</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 4: Core Idea -->
+    <section class="slide" data-slide="3">
+      <div class="slide-content">
+        <div class="slide-number">03</div>
+        <h2>基本的な考え方：分散の分解</h2>
+        <div class="decomposition">
+          <div class="decomp-box total">
+            <div class="decomp-label">全体の変動</div>
+            <div class="decomp-abbr">SST</div>
+          </div>
+          <div class="decomp-equals">=</div>
+          <div class="decomp-box between">
+            <div class="decomp-label">群間変動</div>
+            <div class="decomp-abbr">SSB</div>
+          </div>
+          <div class="decomp-plus">+</div>
+          <div class="decomp-box within">
+            <div class="decomp-label">群内変動</div>
+            <div class="decomp-abbr">SSW</div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="col-card between-card">
+            <h3>群間変動（SSB）</h3>
+            <p class="col-en">Sum of Squares Between</p>
+            <p>各群の平均と全体平均の差</p>
+            <div class="col-meaning">→ <strong>要因の効果</strong></div>
+          </div>
+          <div class="col-card within-card">
+            <h3>群内変動（SSW）</h3>
+            <p class="col-en">Sum of Squares Within</p>
+            <p>各群内でのばらつき</p>
+            <div class="col-meaning">→ <strong>誤差（偶然）</strong></div>
+          </div>
+        </div>
+        <div class="card accent-card" style="margin-top:1.5rem">
+          <p>群間変動が群内変動に比べて <strong>十分に大きい</strong> → 「有意な差がある」</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 5: Statistical Model (Theory) -->
+    <section class="slide" data-slide="4">
+      <div class="slide-content">
+        <div class="slide-number">04</div>
+        <h2>理論① 統計モデル</h2>
+        <div class="formula-box">
+          <div class="formula">x<sub>ij</sub> = μ + α<sub>i</sub> + ε<sub>ij</sub></div>
+        </div>
+        <div class="var-list">
+          <div class="var-item">
+            <span class="var-name">x<sub>ij</sub></span>
+            <span class="var-desc">第 i 群の j 番目のデータ</span>
+          </div>
+          <div class="var-item">
+            <span class="var-name">μ</span>
+            <span class="var-desc">全体の平均（共通部分）</span>
+          </div>
+          <div class="var-item">
+            <span class="var-name">α<sub>i</sub></span>
+            <span class="var-desc">第 i 群の効果（その群特有のずれ）</span>
+          </div>
+          <div class="var-item">
+            <span class="var-name">ε<sub>ij</sub></span>
+            <span class="var-desc">誤差項 〜 N(0, σ²)　独立・等分散</span>
+          </div>
+        </div>
+        <div class="card accent-card" style="margin-top:1rem">
+          <p>帰無仮説 H₀ : α₁ = α₂ = … = α<sub>k</sub> = 0<br>（すべての群の効果がゼロ ＝ 群間に差がない）</p>
+        </div>
+        <div class="note-box" style="margin-top:1rem">
+          <p>📝 このモデルは「データ ＝ 全体平均 ＋ 群の効果 ＋ 偶然の誤差」という構造を仮定している</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 6: What MSB and MSW estimate (Theory) -->
+    <section class="slide" data-slide="5">
+      <div class="slide-content">
+        <div class="slide-number">05</div>
+        <h2>理論② MSB と MSW は何を推定するか</h2>
+        <p class="lead">これが分散分析の<strong>理論の核心</strong>です</p>
+        <div class="two-col">
+          <div class="col-card within-card">
+            <h3>MSW（群内平均平方）</h3>
+            <p class="col-en">常に成り立つ</p>
+            <div class="theory-formula">E[MSW] = σ²</div>
+            <p>群の平均が何であっても、群内のばらつきは<strong>誤差 ε だけ</strong>で決まる</p>
+          </div>
+          <div class="col-card between-card">
+            <h3>MSB（群間平均平方）</h3>
+            <p class="col-en">H₀ が正しいかどうかで変わる</p>
+            <div class="theory-formula">E[MSB] = σ² + <span class="theory-extra">群間差</span></div>
+            <p>H₀ のもとでは σ² のみ<br>H₁ のもとでは σ² ＋ α の効果</p>
+          </div>
+        </div>
+        <div class="card highlight-card" style="margin-top:1.5rem">
+          <div class="card-icon">💡</div>
+          <p class="card-text">同じ σ² を<strong>2つの異なる方法</strong>で推定し、その比をとる——これが分散分析のエッセンス</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 7: Why F works (Theory) -->
+    <section class="slide" data-slide="6">
+      <div class="slide-content">
+        <div class="slide-number">06</div>
+        <h2>理論③ なぜ F値で判定できるのか</h2>
+        <div class="theory-comparison">
+          <div class="theory-case case-h0">
+            <div class="case-header">H₀ が正しいとき</div>
+            <div class="case-body">
+              <div class="case-row"><span class="case-label">MSB の期待値</span><span class="case-value">σ²</span></div>
+              <div class="case-row"><span class="case-label">MSW の期待値</span><span class="case-value">σ²</span></div>
+              <div class="case-divider"></div>
+              <div class="case-row"><span class="case-label">F = MSB / MSW</span><span class="case-value f-approx">≈ 1</span></div>
+            </div>
+            <div class="case-conclusion">分子と分母が同じものを推定<br>→ 比は 1 付近に</div>
+          </div>
+          <div class="theory-case case-h1">
+            <div class="case-header">H₁ が正しいとき</div>
+            <div class="case-body">
+              <div class="case-row"><span class="case-label">MSB の期待値</span><span class="case-value">σ² + 群間差</span></div>
+              <div class="case-row"><span class="case-label">MSW の期待値</span><span class="case-value">σ²</span></div>
+              <div class="case-divider"></div>
+              <div class="case-row"><span class="case-label">F = MSB / MSW</span><span class="case-value f-large">≫ 1</span></div>
+            </div>
+            <div class="case-conclusion">分子だけが膨らむ<br>→ 比が 1 より大きくなる</div>
+          </div>
+        </div>
+        <div class="card accent-card" style="margin-top:1.5rem">
+          <p>F が「1 からどれだけ離れたか」を F分布で評価 → 棄却域や p値を計算できる</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 8: Why F-distribution (Theory) -->
+    <section class="slide" data-slide="7">
+      <div class="slide-content">
+        <div class="slide-number">07</div>
+        <h2>理論④ なぜ F分布に従うのか</h2>
+        <p class="lead">正規分布の仮定のもとで、以下が成り立ちます</p>
+        <div class="theory-steps">
+          <div class="theory-step-item">
+            <div class="theory-step-num">①</div>
+            <div class="theory-step-body">
+              <p>SSW / σ² 〜 χ²(N − k)</p>
+              <p class="theory-step-note">各群の偏差二乗和の合計</p>
+            </div>
+          </div>
+          <div class="theory-step-item">
+            <div class="theory-step-num">②</div>
+            <div class="theory-step-body">
+              <p>H₀ のもとで SSB / σ² 〜 χ²(k − 1)</p>
+              <p class="theory-step-note">群平均のばらつきが偶然だけで生じる場合</p>
+            </div>
+          </div>
+          <div class="theory-step-item">
+            <div class="theory-step-num">③</div>
+            <div class="theory-step-body">
+              <p>SSB と SSW は<strong>独立</strong></p>
+              <p class="theory-step-note">射影の直交性から証明できる</p>
+            </div>
+          </div>
+        </div>
+        <div class="formula-box" style="margin-top:1.5rem">
+          <div class="formula" style="font-size:1.1rem">
+            F = <span class="frac"><span class="frac-num">χ²(k−1) / (k−1)</span><span class="frac-den">χ²(N−k) / (N−k)</span></span>
+            〜 F(k−1, N−k)
+          </div>
+        </div>
+        <div class="note-box" style="margin-top:1rem">
+          <p>📝 F分布の定義 =「独立な2つの χ² 変数を各自由度で割った比」にぴったり一致する</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 9: Terminology -->
+    <section class="slide" data-slide="8">
+      <div class="slide-content">
+        <div class="slide-number">08</div>
+        <h2>用語一覧</h2>
+        <div class="table-wrapper">
+          <table class="term-table">
+            <thead>
+              <tr>
+                <th>略称</th>
+                <th>英語</th>
+                <th>日本語</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="code">SST</span></td>
+                <td>Sum of Squares Total</td>
+                <td>全体平方和</td>
+              </tr>
+              <tr>
+                <td><span class="code">SSB</span></td>
+                <td>Sum of Squares Between</td>
+                <td>群間平方和</td>
+              </tr>
+              <tr>
+                <td><span class="code">SSW</span></td>
+                <td>Sum of Squares Within</td>
+                <td>群内平方和</td>
+              </tr>
+              <tr>
+                <td><span class="code">MSB</span></td>
+                <td>Mean Square Between</td>
+                <td>群間平均平方</td>
+              </tr>
+              <tr>
+                <td><span class="code">MSW</span></td>
+                <td>Mean Square Within</td>
+                <td>群内平均平方</td>
+              </tr>
+              <tr>
+                <td><span class="code">df</span></td>
+                <td>Degrees of Freedom</td>
+                <td>自由度</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note-box">
+          <p>📝 教科書により SSB → SS<sub>A</sub>、SSW → SS<sub>E</sub> (Error) と書くこともある</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 6: F statistic -->
+    <section class="slide" data-slide="9">
+      <div class="slide-content">
+        <div class="slide-number">09</div>
+        <h2>F 検定統計量</h2>
+        <div class="formula-box">
+          <div class="formula">
+            F = <span class="frac"><span class="frac-num">MSB</span><span class="frac-den">MSW</span></span>
+            = <span class="frac"><span class="frac-num">SSB / (k − 1)</span><span class="frac-den">SSW / (N − k)</span></span>
+          </div>
+        </div>
+        <div class="var-list">
+          <div class="var-item">
+            <span class="var-name">k</span>
+            <span class="var-desc">群の数</span>
+          </div>
+          <div class="var-item">
+            <span class="var-name">N</span>
+            <span class="var-desc">全データ数</span>
+          </div>
+          <div class="var-item">
+            <span class="var-name">k − 1</span>
+            <span class="var-desc">群間の自由度</span>
+          </div>
+          <div class="var-item">
+            <span class="var-name">N − k</span>
+            <span class="var-desc">群内の自由度</span>
+          </div>
+        </div>
+        <div class="card accent-card">
+          <p>F値が大きい → 群間の差が大きい → 帰無仮説を棄却</p>
+          <p style="margin-top:0.5rem; opacity:0.8;">F値は <strong>F分布</strong>（自由度 k−1, N−k）に従う</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 7: Example Data -->
+    <section class="slide" data-slide="10">
+      <div class="slide-content">
+        <div class="slide-number">10</div>
+        <h2>計算例：データの確認</h2>
+        <div class="example-box">
+          <div class="example-label">問題</div>
+          <p>3種類の学習法（A, B, C）でテストの点数に差があるか？（有意水準5%）</p>
+        </div>
+        <div class="data-grid">
+          <div class="data-group group-a">
+            <h3>学習法A <span class="n-label">n=3</span></h3>
+            <div class="data-values">
+              <span>60</span><span>70</span><span>80</span>
+            </div>
+            <div class="data-mean">平均 = <strong>70</strong></div>
+          </div>
+          <div class="data-group group-b">
+            <h3>学習法B <span class="n-label">n=5</span></h3>
+            <div class="data-values">
+              <span>70</span><span>80</span><span>60</span><span>75</span><span>65</span>
+            </div>
+            <div class="data-mean">平均 = <strong>70</strong></div>
+          </div>
+          <div class="data-group group-c">
+            <h3>学習法C <span class="n-label">n=4</span></h3>
+            <div class="data-values">
+              <span>80</span><span>90</span><span>85</span><span>95</span>
+            </div>
+            <div class="data-mean">平均 = <strong>87.5</strong></div>
+          </div>
+        </div>
+        <div class="overall-mean">
+          全体平均: x̄ = 910 / 12 ≈ <strong>75.83</strong>
+        </div>
+        <div class="note-box">
+          <p>⚠️ 各群のデータ数が異なる（3, 5, 4）→ SSBの重みづけに注意</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 8: SSB Calculation -->
+    <section class="slide" data-slide="11">
+      <div class="slide-content">
+        <div class="slide-number">11</div>
+        <h2>計算① 群間変動（SSB）</h2>
+        <div class="formula-box small">
+          <div class="formula">SSB = Σ n<sub>i</sub> (x̄<sub>i</sub> − x̄)<sup>2</sup></div>
+        </div>
+        <div class="calc-steps">
+          <div class="calc-row">
+            <span class="calc-label group-a-text">A:</span>
+            <span class="calc-expr"><span class="weight">3</span> × (70 − 75.83)² = <span class="weight">3</span> × 34.03 = <strong>102.08</strong></span>
+          </div>
+          <div class="calc-row">
+            <span class="calc-label group-b-text">B:</span>
+            <span class="calc-expr"><span class="weight">5</span> × (70 − 75.83)² = <span class="weight">5</span> × 34.03 = <strong>170.14</strong></span>
+          </div>
+          <div class="calc-row">
+            <span class="calc-label group-c-text">C:</span>
+            <span class="calc-expr"><span class="weight">4</span> × (87.5 − 75.83)² = <span class="weight">4</span> × 136.11 = <strong>544.44</strong></span>
+          </div>
+          <div class="calc-total">
+            SSB = 102.08 + 170.14 + 544.44 = <strong>816.67</strong>
+          </div>
+        </div>
+        <div class="card highlight-card" style="margin-top:1rem">
+          <div class="card-icon">💡</div>
+          <p class="card-text">A と B は同じ平均（70）でも、データ数の重み（3 vs 5）で SSB への寄与が異なる</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 9: SSW Calculation -->
+    <section class="slide" data-slide="12">
+      <div class="slide-content">
+        <div class="slide-number">12</div>
+        <h2>計算② 群内変動（SSW）</h2>
+        <div class="formula-box small">
+          <div class="formula">SSW = Σ Σ (x<sub>ij</sub> − x̄<sub>i</sub>)<sup>2</sup></div>
+        </div>
+        <div class="calc-steps">
+          <div class="calc-row">
+            <span class="calc-label group-a-text">A</span>
+            <span class="calc-expr-small">(60−70)² + (70−70)² + (80−70)²</span>
+            <span class="calc-result">= <strong>200</strong></span>
+          </div>
+          <div class="calc-row">
+            <span class="calc-label group-b-text">B</span>
+            <span class="calc-expr-small">(70−70)² + (80−70)² + (60−70)² + (75−70)² + (65−70)²</span>
+            <span class="calc-result">= <strong>250</strong></span>
+          </div>
+          <div class="calc-row">
+            <span class="calc-label group-c-text">C</span>
+            <span class="calc-expr-small">(80−87.5)² + (90−87.5)² + (85−87.5)² + (95−87.5)²</span>
+            <span class="calc-result">= <strong>125</strong></span>
+          </div>
+          <div class="calc-total">
+            SSW = 200 + 250 + 125 = <strong>575</strong>
+          </div>
+        </div>
+        <div class="note-box" style="margin-top: 1rem;">
+          <p>各データと <em>その群の平均</em> との差の二乗和（全体平均ではない点に注意）</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 10: ANOVA Table -->
+    <section class="slide" data-slide="13">
+      <div class="slide-content">
+        <div class="slide-number">13</div>
+        <h2>分散分析表</h2>
+        <div class="table-wrapper anova-table-wrapper">
+          <table class="anova-table">
+            <thead>
+              <tr>
+                <th>要因</th>
+                <th>SS</th>
+                <th>df</th>
+                <th>MS = SS/df</th>
+                <th>F値</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row-between">
+                <td>群間</td>
+                <td>816.67</td>
+                <td>k−1 = <strong>2</strong></td>
+                <td><strong>408.33</strong></td>
+                <td class="f-value"><strong>6.39</strong></td>
+              </tr>
+              <tr class="row-within">
+                <td>群内（誤差）</td>
+                <td>575.00</td>
+                <td>N−k = <strong>9</strong></td>
+                <td><strong>63.89</strong></td>
+                <td>—</td>
+              </tr>
+              <tr class="row-total">
+                <td>全体</td>
+                <td>1391.67</td>
+                <td>N−1 = <strong>11</strong></td>
+                <td>—</td>
+                <td>—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="verify-box">
+          <p>✓ SST = SSB + SSW = 816.67 + 575 = 1391.67</p>
+          <p>✓ df: 2 + 9 = 11</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 11: Conclusion -->
+    <section class="slide" data-slide="14">
+      <div class="slide-content">
+        <div class="slide-number">14</div>
+        <h2>判定と結論</h2>
+        <div class="comparison-box">
+          <div class="comp-item comp-f">
+            <div class="comp-label">計算したF値</div>
+            <div class="comp-value">6.39</div>
+          </div>
+          <div class="comp-vs">＞</div>
+          <div class="comp-item comp-critical">
+            <div class="comp-label">棄却域 F<sub>0.05</sub>(2, 9)</div>
+            <div class="comp-value">4.26</div>
+          </div>
+        </div>
+        <div class="conclusion-box">
+          <p class="conclusion-text">帰無仮説 H₀ を <strong>棄却</strong></p>
+          <p class="conclusion-detail">有意水準5%で、学習法によってテスト点数に<strong>有意な差がある</strong></p>
+        </div>
+        <div class="card highlight-card" style="margin-top:1.5rem">
+          <div class="card-icon">⚠️</div>
+          <p class="card-text">分散分析で有意差が出ても「<em>どの群間</em>に差があるか」は分からない<br>→ <strong>多重比較法</strong>（Tukey法など）で事後検定が必要</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 12: Flow Summary -->
+    <section class="slide" data-slide="15">
+      <div class="slide-content">
+        <div class="slide-number">15</div>
+        <h2>検定の流れ（まとめ）</h2>
+        <div class="flow-chart">
+          <div class="flow-step">
+            <div class="flow-num">1</div>
+            <div class="flow-text">
+              <strong>仮説を立てる</strong>
+              <p>H₀: μ₁ = μ₂ = … = μ<sub>k</sub></p>
+            </div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">
+            <div class="flow-num">2</div>
+            <div class="flow-text">
+              <strong>各群の平均と全体平均を計算</strong>
+            </div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">
+            <div class="flow-num">3</div>
+            <div class="flow-text">
+              <strong>SSB・SSW を求める</strong>
+              <p>SST = SSB + SSW で検算</p>
+            </div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">
+            <div class="flow-num">4</div>
+            <div class="flow-text">
+              <strong>分散分析表を作成し F値を計算</strong>
+              <p>F = MSB / MSW</p>
+            </div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">
+            <div class="flow-num">5</div>
+            <div class="flow-text">
+              <strong>F分布表と比較し判定</strong>
+              <p>F &gt; F<sub>α</sub> なら棄却</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 13: Assumptions -->
+    <section class="slide" data-slide="16">
+      <div class="slide-content">
+        <div class="slide-number">16</div>
+        <h2>分散分析の前提条件</h2>
+        <div class="assumptions">
+          <div class="assumption-card">
+            <div class="assumption-num">1</div>
+            <div class="assumption-body">
+              <h3>独立性</h3>
+              <p>各観測値が互いに独立であること</p>
+            </div>
+          </div>
+          <div class="assumption-card">
+            <div class="assumption-num">2</div>
+            <div class="assumption-body">
+              <h3>正規性</h3>
+              <p>各群のデータが正規分布に従うこと</p>
+            </div>
+          </div>
+          <div class="assumption-card">
+            <div class="assumption-num">3</div>
+            <div class="assumption-body">
+              <h3>等分散性</h3>
+              <p>各群の母分散が等しいこと<br><span class="assumption-note">（Levene検定等で確認）</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 14: End -->
+    <section class="slide" data-slide="17">
+      <div class="slide-content title-slide">
+        <div class="badge">まとめ</div>
+        <h1>分散分析（ANOVA）</h1>
+        <div class="end-summary">
+          <p>✅ 3群以上の平均の差を1回の検定で判定</p>
+          <p>✅ SST = SSB + SSW に分解</p>
+          <p>✅ MSB と MSW が同じ σ² を推定するかで判定</p>
+          <p>✅ F = MSB / MSW → F分布で検定</p>
+          <p>✅ 有意ならば多重比較へ</p>
+        </div>
+        <div class="title-decoration">
+          <div class="deco-line"></div>
+          <div class="deco-dot"></div>
+          <div class="deco-line"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation -->
+    <nav class="nav-controls">
+      <button class="nav-btn" id="prevBtn" aria-label="前のスライド">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="slide-counter">
+        <span id="currentSlide">1</span> / <span id="totalSlides">18</span>
+      </div>
+      <button class="nav-btn" id="nextBtn" aria-label="次のスライド">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </nav>
+
+    <!-- Slide Dots -->
+    <div class="slide-dots" id="slideDots"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
